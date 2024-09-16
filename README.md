@@ -9,3 +9,5 @@ npm install -d parcel
 	"start": "parcel index.html",<br />
 	"build": "parcel build index.html"<br />
 	}
+### to run the application
+npm start
