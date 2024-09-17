@@ -257,6 +257,18 @@ nav .logo {
   margin-top: 10px;
 }
 
+/* Keyframes for sliding up animation */
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* Suggestion button styles */
 .suggestion {
   font-family: Poppins, sans-serif;
@@ -271,7 +283,22 @@ nav .logo {
   line-height: 1.5;
   color: #607AD6;
   transition: background-color 0.3s, border-color 0.3s;
-  animation: slideUp 0.5s ease-out;
+  opacity: 0; /* Hide initially */
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Delay animations for each suggestion */
+.suggestion:nth-child(1) {
+  animation-delay: 0s;
+}
+.suggestion:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.suggestion:nth-child(3) {
+  animation-delay: 1s;
+}
+.suggestion:nth-child(4) {
+  animation-delay: 1.5s;
 }
 
 .suggestion:hover {
