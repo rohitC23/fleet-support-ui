@@ -65,7 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
       displayInputMessage(userInput, "user");
       document.getElementById("user-input").value = "";
-      showLoadingDots();
+    
+      // Show the bot typing indicator
+      addBotTypingIndicator();
     
       // Remove the suggestion container if it exists
       const suggestionContainer = document.querySelector(".suggestions");
@@ -79,75 +81,135 @@ document.addEventListener("DOMContentLoaded", () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_query: userInput
+          user_query: userInput,
         }),
       })
         .then((response) => response.json())
         .then((data) => {
-          hideLoadingDots();
-          console.log(data, "data");
+          removeTypingIndicator(); // Remove the typing indicator
           displayMessage(data, "bot");
         })
         .catch((error) => {
-          hideLoadingDots();
+          removeTypingIndicator(); // Remove the typing indicator in case of an error
           console.error("Error:", error);
         });
-    }       
-  
-    function displayMessage(data, sender) {
+    }
+    
+    function addBotTypingIndicator() {
       const chatbox = document.getElementById("chatbox");
-  
-      // Create a message container element
+    
+      // Create a container for the bot's typing indicator
+      const botContainer = document.createElement("div");
+      botContainer.classList.add("bot-container");
+      botContainer.id = "bot-typing-indicator"; // ID to reference it later
+    
+      // Create the bot icon element
+      const botIcon = document.createElement("div");
+      botIcon.classList.add("bot-icon");
+    
+      // Create the message container to hold the typing dots
       const messageElem = document.createElement("div");
-      messageElem.classList.add("message", sender);
-  
-      // Create a span element for displaying the message text
-      const messageSpan = document.createElement("span");
-  
-      // Helper function to format the message with bold and links
-      const formatMessage = (messageText) => {
-          // Convert **bold text** to <strong> tags
-          let formattedText = messageText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-          // Convert [text](URL) to <a href="URL">text</a>
-          formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
-          return formattedText.replace(/\n/g, "<br>"); // Convert line breaks to <br> tags
-      };
-  
-      // Format the message
-      let formattedMessage = formatMessage(data.message);
-  
-      // Set the inner HTML of the span element with the formatted message
-      messageSpan.innerHTML = formattedMessage;
-  
-      // Append the span element to the message container
-      messageElem.appendChild(messageSpan);
-  
-      // Check if images exist and create image elements for each
-      if (Array.isArray(data.images)) {
-          data.images.forEach((imageBase64) => {
-              const imageElem = document.createElement("img");
-              imageElem.src = `data:image/jpeg;base64,${imageBase64}`;
-              imageElem.alt = "Image";
-              imageElem.style.maxWidth = "100%"; // Set a maximum width to ensure it fits within the chatbox
-              imageElem.style.marginTop = "10px"; // Add some spacing between the text and image
-  
-              // Add click event to maximize the image
-              imageElem.addEventListener('click', () => {
-                  showImageModal(imageElem.src);
-              });
-  
-              // Append the image element to the message container
-              messageElem.appendChild(imageElem);
-          });
+      messageElem.classList.add("message", "bot");
+    
+      // Create the typing dots
+      const dotsContainer = document.createElement("div");
+      dotsContainer.classList.add("typing-dots");
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement("span");
+        dot.classList.add("dot");
+        dotsContainer.appendChild(dot);
       }
-  
-      // Append the message element to the chatbox
-      chatbox.appendChild(messageElem);
-  
+    
+      // Append typing dots to the message container
+      messageElem.appendChild(dotsContainer);
+    
+      // Append the bot icon and message container to the botContainer
+      botContainer.appendChild(botIcon);
+      botContainer.appendChild(messageElem);
+    
+      // Append the botContainer to the chatbox
+      chatbox.appendChild(botContainer);
+    
       // Scroll to the bottom of the chatbox
       chatbox.scrollTop = chatbox.scrollHeight;
     }
-  
+    
+    function removeTypingIndicator() {
+      // Find and remove the typing indicator container
+      const typingIndicator = document.getElementById("bot-typing-indicator");
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+    
+    function displayMessage(data, sender) {
+      const chatbox = document.getElementById("chatbox");
+    
+      // Create a container for the bot's message and icon
+      const botContainer = document.createElement("div");
+      botContainer.classList.add("bot-container");
+    
+      // Create the bot icon element for bot messages
+      if (sender === "bot") {
+        const botIcon = document.createElement("div");
+        botIcon.classList.add("bot-icon");
+        botContainer.appendChild(botIcon);
+      }
+    
+      // Create a message container element
+      const messageElem = document.createElement("div");
+      messageElem.classList.add("message", sender);
+    
+      // Create a span element for displaying the message text
+      const messageSpan = document.createElement("span");
+    
+      // Helper function to format the message with bold and links
+      const formatMessage = (messageText) => {
+        let formattedText = messageText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        return formattedText.replace(/\n/g, "<br>");
+      };
+    
+      // Format the message
+      let formattedMessage = formatMessage(data.message);
+    
+      // Set the inner HTML of the span element with the formatted message
+      messageSpan.innerHTML = formattedMessage;
+    
+      // Append the span element to the message container
+      messageElem.appendChild(messageSpan);
+    
+      // Append the message container to the botContainer
+      botContainer.appendChild(messageElem);
+
+      // Check if images exist and create image elements for each
+      if (Array.isArray(data.images)) {
+        data.images.forEach((imageBase64) => {
+            const imageElem = document.createElement("img");
+            imageElem.src = `data:image/jpeg;base64,${imageBase64}`;
+            imageElem.alt = "Image";
+            imageElem.style.maxWidth = "100%"; // Set a maximum width to ensure it fits within the chatbox
+            imageElem.style.marginTop = "10px"; // Add some spacing between the text and image
+
+            // Add click event to maximize the image
+            imageElem.addEventListener('click', () => {
+                showImageModal(imageElem.src);
+            });
+
+            // Append the image element to the message container
+            messageElem.appendChild(imageElem);
+        });
+      }
+    
+      // Append the botContainer to the chatbox
+      chatbox.appendChild(botContainer);
+    
+      // Scroll to the bottom of the chatbox
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+    
+    
+      
     // Function to create and display the image modal
     function showImageModal(imageSrc) {
         // Create modal container
@@ -193,28 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
             border-radius: 5px;
         }
     `;
-    document.head.appendChild(style);  
-       
-    function showLoadingDots() {
-      const chatbox = document.getElementById("chatbox");
-      const loadingDots = document.createElement("div");
-      loadingDots.id = "loading-dots";
-      loadingDots.classList.add("loading");
-      loadingDots.innerHTML = `
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      `;
-      chatbox.appendChild(loadingDots);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
-  
-    function hideLoadingDots() {
-      const loadingDots = document.getElementById("loading-dots");
-      if (loadingDots) {
-        loadingDots.remove();
-      }
-    }
+    document.head.appendChild(style); 
   
     function hideGreetingAndSuggestions() {
       const suggestionsContainer = document.querySelector('.suggestions');
