@@ -145,29 +145,29 @@ nav .logo {
 #user-input-container {
   display: flex;
   align-items: center;
-  padding: 10px;
-  margin-bottom: 5px;
+  padding: 5px;
+  background-color: #f0f0f0;
 }
+
 #user-input {
   flex: 1;
   padding: 10px;
-  border-radius: 20px;
-  border: 1px solid #ccc;
-  margin-right: 10px;
-  font-size: 16px;
-}
-#send-btn {
-  background-color: #FFBA07;
-  color: white;
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  font-size: 16px;
+  outline: none;
+  background-color: transparent;
+}
+
+#send-btn {
+  background-color: transparent;
+  color: #607ad6;
+  border: none;
+  margin-left: 5px;
+  font-size: 24px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 22px;
 }
 
 .loading {
@@ -506,4 +506,60 @@ input {
   justify-content: center;
   cursor: pointer;
   position: relative;
+}
+
+/* Container for bot's message and icon */
+.bot-container {
+  display: flex;
+  align-items: flex-start;
+  margin: 10px 0;
+}
+
+/* Bot icon styling */
+.bot-icon {
+  width: 40px;
+  height: 40px;
+  background: url('images/bot-circle-icon.jpg') no-repeat center center;
+  background-size: cover;
+  border-radius: 50%;
+}
+
+/* Message styling */
+.message.bot {
+  background-color: #f1f1f1;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+  display: inline-block;
+}
+
+/* Typing dots */
+.typing-dots {
+  display: flex;
+}
+
+.typing-dots .dot {
+  width: 8px;
+  height: 8px;
+  margin: 0 3px;
+  background-color: #ccc;
+  border-radius: 50%;
+  animation: blink 1.4s infinite both;
+}
+
+.typing-dots .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
 }
