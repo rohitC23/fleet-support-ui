@@ -549,6 +549,7 @@ input {
   background: url('images/bot-circle-icon.jpg') no-repeat center center;
   background-size: cover;
   border-radius: 50%;
+  
 }
 
 /* Message styling */
@@ -588,5 +589,129 @@ input {
   }
   40% {
     opacity: 1;
+  }
+}
+
+/* Container for the entire bot message */
+.bot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+
+/* Emoji reaction bar styling */
+.emoji-reaction-bar {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 5px;
+}
+
+.emoji-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.emoji-button:hover {
+  transform: scale(1.2); /* Scale up the emoji slightly when hovered */
+}
+
+.emoji-count {
+  margin-left: 5px;
+  font-size: 14px;
+  color: #888;
+}
+
+
+/* General styling for the form container */
+.feedback-form {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  width: 100%;
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Styling the labels */
+.feedback-form label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Styling the input fields */
+.feedback-form input,
+.feedback-form textarea {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+/* Add focus effect on input fields */
+.feedback-form input:focus,
+.feedback-form textarea:focus {
+  border-color: #007BFF;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Styling the textarea */
+.feedback-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Styling the submit button */
+.feedback-form button[type="submit"] {
+  padding: 12px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect on the submit button */
+.feedback-form button[type="submit"]:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+/* Add some margin to the input fields */
+.feedback-form input,
+.feedback-form textarea {
+  margin-bottom: 10px;
+}
+
+/* Style for form gap between fields */
+.feedback-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Media query for mobile responsiveness */
+@media (max-width: 768px) {
+  .feedback-form {
+      width: 100%;
+      padding: 15px;
   }
 }
