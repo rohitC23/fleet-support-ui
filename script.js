@@ -162,6 +162,10 @@ document.addEventListener("DOMContentLoaded", () => {
           botContainer.appendChild(botIcon);
       }
   
+      // Create a wrapper div to contain both message and emoji-reaction-bar
+      const messageWrapper = document.createElement("div");
+      messageWrapper.classList.add("message-wrapper");
+  
       // Create a message container element
       const messageElem = document.createElement("div");
       messageElem.classList.add("message", sender);
@@ -185,8 +189,78 @@ document.addEventListener("DOMContentLoaded", () => {
       // Append the span element to the message container
       messageElem.appendChild(messageSpan);
   
-      // Append the message container to the botContainer
-      botContainer.appendChild(messageElem);
+      // Append the message container to the messageWrapper
+      messageWrapper.appendChild(messageElem);
+
+      // Create the emoji reaction bar
+      const emojiReactionBar = document.createElement("div");
+      emojiReactionBar.classList.add("emoji-reaction-bar");
+  
+      // If the message matches the specific message, add two buttons
+      if (data.message === "Similar questions detected. Do you want to contact the agent about your inconvenience.") {
+          emojiReactionBar.style.display = "none";
+
+          const buttonContainer = document.createElement("div");
+          buttonContainer.classList.add("button-container");
+  
+          const yesButton = document.createElement("button");
+          yesButton.textContent = "Yes";
+          yesButton.classList.add("response-button");
+          yesButton.addEventListener("click", () => {
+              // Handle the 'Yes' button click
+              showFeedbackForm();
+              buttonContainer.style.display = "none";
+              userInputContainer.style.display = "none";
+          });
+  
+          const noButton = document.createElement("button");
+          noButton.textContent = "No";
+          noButton.classList.add("response-button");
+          noButton.addEventListener("click", () => {
+              // Handle the 'No' button click
+              alert("You chose not to contact the agent.");
+              // You can trigger additional functions here
+          });
+  
+          buttonContainer.appendChild(yesButton);
+          buttonContainer.appendChild(noButton);
+  
+          // Append the button container to the messageWrapper
+          messageWrapper.appendChild(buttonContainer);
+      }
+
+
+      if (data.message === "Please submit the below feedback form and our customer executive will reach you") {
+        emojiReactionBar.style.display = "none";
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.classList.add("button-container");
+
+        const yesButton = document.createElement("button");
+        yesButton.textContent = "Yes";
+        yesButton.classList.add("response-button");
+        yesButton.addEventListener("click", () => {
+            // Handle the 'Yes' button click
+            showFeedbackForm();
+            buttonContainer.style.display = "none";
+            userInputContainer.style.display = "none";
+        });
+
+        const noButton = document.createElement("button");
+        noButton.textContent = "No";
+        noButton.classList.add("response-button");
+        noButton.addEventListener("click", () => {
+            // Handle the 'No' button click
+            alert("You chose not to contact the agent.");
+            // You can trigger additional functions here
+        });
+
+        buttonContainer.appendChild(yesButton);
+        buttonContainer.appendChild(noButton);
+
+        // Append the button container to the messageWrapper
+        messageWrapper.appendChild(buttonContainer);
+      }
   
       // Check if images exist and create image elements for each
       if (Array.isArray(data.images)) {
@@ -205,11 +279,8 @@ document.addEventListener("DOMContentLoaded", () => {
               // Append the image element to the message container
               messageElem.appendChild(imageElem);
           });
-      }
-  
-      // Create the emoji reaction bar
-      const emojiReactionBar = document.createElement("div");
-      emojiReactionBar.classList.add("emoji-reaction-bar");
+      }  
+      
   
       // Define emojis without initial counts
       const emojis = [
@@ -224,7 +295,8 @@ document.addEventListener("DOMContentLoaded", () => {
       emojis.forEach((emojiObj) => {
           const emojiButton = document.createElement("button");
           emojiButton.classList.add("emoji-button");
-          emojiButton.innerHTML =`${emojiObj.emoji} <span class="emoji-count">${emojiObj.count}</span>`;
+          emojiButton.innerHTML = `${emojiObj.emoji} <span class="emoji-count">${emojiObj.count}</span>`;
+  
           // Event listener to allow only one emoji selection
           emojiButton.addEventListener("click", function () {
               if (!hasSelectedEmoji) {
@@ -248,8 +320,11 @@ document.addEventListener("DOMContentLoaded", () => {
           emojiReactionBar.appendChild(emojiButton);
       });
   
-      // Append the emoji reaction bar BELOW the message container
-      botContainer.appendChild(emojiReactionBar);
+      // Append the emoji reaction bar to the messageWrapper
+      messageWrapper.appendChild(emojiReactionBar);
+  
+      // Append the messageWrapper (with message and emoji reaction bar) to the botContainer
+      botContainer.appendChild(messageWrapper);
   
       // Append the botContainer to the chatbox
       chatbox.appendChild(botContainer);
@@ -257,6 +332,8 @@ document.addEventListener("DOMContentLoaded", () => {
       // Scroll to the bottom of the chatbox
       chatbox.scrollTop = chatbox.scrollHeight;
   }
+  
+  
   
   // Function to send feedback to the API
   function sendFeedback(userInput, message, feedback) {
@@ -293,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   
   // Function to show feedback form if thumbs down is clicked
-  function showFeedbackForm(botContainer) {
+  function showFeedbackForm() {
     // Create a form element
     const feedbackForm = document.createElement("form");
     feedbackForm.classList.add("feedback-form");
@@ -356,8 +433,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             if (response.ok) {
-                alert("Thank you for your feedback!");
-                feedbackForm.reset();  // Optionally, clear the form after submission
+                // alert("Thank you for your feedback!");
+                // feedbackForm.reset();  // Optionally, clear the form after submission
+                feedbackForm.style.display = "none";
+                userInputContainer.style.display = "flex";
             } else {
                 alert("There was an error submitting your feedback. Please try again.");
             }
@@ -370,8 +449,8 @@ document.addEventListener("DOMContentLoaded", () => {
     feedbackForm.appendChild(submitButton);
 
     // Append the form to the botContainer (below the thumbs down message)
-    botContainer.appendChild(feedbackForm);
-}
+    chatbox.appendChild(feedbackForm);
+  }
     
       
     // Function to create and display the image modal
