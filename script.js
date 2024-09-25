@@ -191,46 +191,32 @@ document.addEventListener("DOMContentLoaded", () => {
   
       // Append the message container to the messageWrapper
       messageWrapper.appendChild(messageElem);
-
+  
       // Create the emoji reaction bar
       const emojiReactionBar = document.createElement("div");
       emojiReactionBar.classList.add("emoji-reaction-bar");
-  
+      
+      // Check if images exist and create image elements for each
+      if (Array.isArray(data.images)) {
+        data.images.forEach((imageBase64) => {
+            const imageElem = document.createElement("img");
+            imageElem.src = `data:image/jpeg;base64,${imageBase64}`;
+            imageElem.alt = "Image";
+            imageElem.style.maxWidth = "100%"; // Set a maximum width to ensure it fits within the chatbox
+            imageElem.style.marginTop = "10px"; // Add some spacing between the text and image
+
+            // Add click event to maximize the image
+            imageElem.addEventListener('click', () => {
+                showImageModal(imageElem.src);
+            });
+
+            // Append the image element to the message container
+            messageElem.appendChild(imageElem);
+        });
+      }
+      
       // If the message matches the specific message, add two buttons
       if (data.message === "Similar questions detected. Do you want to contact the agent about your inconvenience.") {
-          emojiReactionBar.style.display = "none";
-
-          const buttonContainer = document.createElement("div");
-          buttonContainer.classList.add("button-container");
-  
-          const yesButton = document.createElement("button");
-          yesButton.textContent = "Yes";
-          yesButton.classList.add("response-button");
-          yesButton.addEventListener("click", () => {
-              // Handle the 'Yes' button click
-              showFeedbackForm();
-              buttonContainer.style.display = "none";
-              userInputContainer.style.display = "none";
-          });
-  
-          const noButton = document.createElement("button");
-          noButton.textContent = "No";
-          noButton.classList.add("response-button");
-          noButton.addEventListener("click", () => {
-              // Handle the 'No' button click
-              alert("You chose not to contact the agent.");
-              // You can trigger additional functions here
-          });
-  
-          buttonContainer.appendChild(yesButton);
-          buttonContainer.appendChild(noButton);
-  
-          // Append the button container to the messageWrapper
-          messageWrapper.appendChild(buttonContainer);
-      }
-
-
-      if (data.message === "Please submit the below feedback form and our customer executive will reach you") {
         emojiReactionBar.style.display = "none";
 
         const buttonContainer = document.createElement("div");
@@ -241,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
         yesButton.classList.add("response-button");
         yesButton.addEventListener("click", () => {
             // Handle the 'Yes' button click
-            showFeedbackForm();
+            displayBotMessageWithForm();
             buttonContainer.style.display = "none";
             userInputContainer.style.display = "none";
         });
@@ -250,9 +236,8 @@ document.addEventListener("DOMContentLoaded", () => {
         noButton.textContent = "No";
         noButton.classList.add("response-button");
         noButton.addEventListener("click", () => {
-            // Handle the 'No' button click
-            alert("You chose not to contact the agent.");
-            // You can trigger additional functions here
+            displayBotMessage();
+            buttonContainer.style.display = "none";
         });
 
         buttonContainer.appendChild(yesButton);
@@ -261,27 +246,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Append the button container to the messageWrapper
         messageWrapper.appendChild(buttonContainer);
       }
-  
-      // Check if images exist and create image elements for each
-      if (Array.isArray(data.images)) {
-          data.images.forEach((imageBase64) => {
-              const imageElem = document.createElement("img");
-              imageElem.src = `data:image/jpeg;base64,${imageBase64}`;
-              imageElem.alt = "Image";
-              imageElem.style.maxWidth = "100%"; // Set a maximum width to ensure it fits within the chatbox
-              imageElem.style.marginTop = "10px"; // Add some spacing between the text and image
-  
-              // Add click event to maximize the image
-              imageElem.addEventListener('click', () => {
-                  showImageModal(imageElem.src);
-              });
-  
-              // Append the image element to the message container
-              messageElem.appendChild(imageElem);
-          });
-      }  
-      
-  
+
+      if (data.message === "Please submit the below feedback form and our customer executive will reach you") {
+        emojiReactionBar.style.display = "none";
+        userInputContainer.style.display = "none";
+        const feedbackForm = showFeedbackForm(); // Call the form display function
+        messageWrapper.appendChild(feedbackForm);
+
+      }
+
       // Define emojis without initial counts
       const emojis = [
           { emoji: "👍", feedback: "Positive", count: 0 },
@@ -305,10 +278,10 @@ document.addEventListener("DOMContentLoaded", () => {
                   hasSelectedEmoji = true; // Mark as selected
                   selectedFeedback = emojiObj.feedback; // Store the selected feedback
   
-                  // If thumbs down is clicked, show feedback form
+                  // If thumbs down is clicked, show feedback form inside a bot message
                   if (emojiObj.emoji === "👎") {
                       userInputContainer.style.display = "none";
-                      showFeedbackForm(botContainer); // Show feedback form
+                      displayBotMessageWithForm(); // Show bot message with feedback form
                   }
   
                   // Send data to the API after the feedback is clicked
@@ -369,89 +342,213 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   
-  // Function to show feedback form if thumbs down is clicked
-  function showFeedbackForm() {
-    // Create a form element
-    const feedbackForm = document.createElement("form");
-    feedbackForm.classList.add("feedback-form");
+  // Function to display a bot message with the feedback form
+  function displayBotMessageWithForm() {
+    const chatbox = document.getElementById("chatbox");
 
-    // Define form fields
-    const fields = [
-        { label: "Name", type: "text", id: "userName", required: true },
-        { label: "Email", type: "email", id: "userEmail", required: true },
-        { label: "Phone Number", type: "tel", id: "userPhone", required: true },
-        { label: "Issue", type: "textarea", id: "userIssue", required: true }
-    ];
+    // Create a container for the bot message
+    const botContainer = document.createElement("div");
+    botContainer.classList.add("bot-container");
 
-    // Loop through fields and create input elements
-    fields.forEach(field => {
-        const fieldLabel = document.createElement("label");
-        fieldLabel.textContent = field.label;
+    // Create bot icon
+    const botIcon = document.createElement("div");
+    botIcon.classList.add("bot-icon");
+    botContainer.appendChild(botIcon);
 
-        const fieldInput = field.type === "textarea" ? document.createElement("textarea") : document.createElement("input");
-        fieldInput.type = field.type;
-        fieldInput.id = field.id;
-        fieldInput.name = field.id;
-        fieldInput.required = field.required;  // Set the field as required
+    // Create a message wrapper for the bot's feedback message
+    const messageWrapper = document.createElement("div");
+    messageWrapper.classList.add("message-wrapper");
 
-        // Append label and input to the form
-        feedbackForm.appendChild(fieldLabel);
-        feedbackForm.appendChild(fieldInput);
-    });
+    // Create the message element
+    const messageElem = document.createElement("div");
+    messageElem.classList.add("message", "bot");
 
-    // Add submit button to form
-    const submitButton = document.createElement("button");
-    submitButton.type = "submit";
-    submitButton.textContent = "Submit Feedback";
+    // Create the message text
+    const messageSpan = document.createElement("span");
+    messageSpan.innerHTML = "Please fill the below feedback form";
 
-    // Event listener for form submission
-    feedbackForm.addEventListener("submit", async function (event) {
-        event.preventDefault();
+    // Append the message to the message container
+    messageElem.appendChild(messageSpan);
+    messageWrapper.appendChild(messageElem);
 
-        // Gather form data
-        const formData = {
-            user_name: document.getElementById("userName").value,
-            user_mail: document.getElementById("userEmail").value,
-            user_number: document.getElementById("userPhone").value,
-            user_feedback: document.getElementById("userIssue").value
-        };
+    // Append the feedback form
+    const feedbackForm = showFeedbackForm(); // Call the form display function
+    messageWrapper.appendChild(feedbackForm);
 
-        // Validate all fields are filled in
-        if (!formData.user_name || !formData.user_mail || !formData.user_number || !formData.user_feedback) {
-            alert("Please fill in all required fields.");
-            return;
-        }
+    // Append the message wrapper to the bot container
+    botContainer.appendChild(messageWrapper);
 
-        try {
-            // Send the form data to the API via POST request
-            const response = await fetch("http://127.0.0.1:8000/feedback", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(formData)
-            });
+    // Append the bot container to the chatbox
+    chatbox.appendChild(botContainer);
 
-            if (response.ok) {
-                // alert("Thank you for your feedback!");
-                // feedbackForm.reset();  // Optionally, clear the form after submission
-                feedbackForm.style.display = "none";
-                userInputContainer.style.display = "flex";
-            } else {
-                alert("There was an error submitting your feedback. Please try again.");
-            }
-        } catch (error) {
-            console.error("Error submitting feedback:", error);
-            alert("There was an issue connecting to the server.");
-        }
-    });
-
-    feedbackForm.appendChild(submitButton);
-
-    // Append the form to the botContainer (below the thumbs down message)
-    chatbox.appendChild(feedbackForm);
+    // Scroll to the bottom of the chatbox
+    chatbox.scrollTop = chatbox.scrollHeight;
   }
-    
+
+  //Function to display thank you message
+  function displayFeedbackMessage() {
+    const chatbox = document.getElementById("chatbox");
+
+    // Create a container for the bot message
+    const botContainer = document.createElement("div");
+    botContainer.classList.add("bot-container");
+
+    // Create bot icon
+    const botIcon = document.createElement("div");
+    botIcon.classList.add("bot-icon");
+    botContainer.appendChild(botIcon);
+
+    // Create a message wrapper for the bot's feedback message
+    const messageWrapper = document.createElement("div");
+    messageWrapper.classList.add("message-wrapper");
+
+    // Create the message element
+    const messageElem = document.createElement("div");
+    messageElem.classList.add("message", "bot");
+
+    // Create the message text
+    const messageSpan = document.createElement("span");
+    messageSpan.innerHTML = "Thank you for submitting your feedback, please let me know how can I help you further?";
+
+    // Append the message to the message container
+    messageElem.appendChild(messageSpan);
+    messageWrapper.appendChild(messageElem);
+
+    // Append the message wrapper to the bot container
+    botContainer.appendChild(messageWrapper);
+
+    // Append the bot container to the chatbox
+    chatbox.appendChild(botContainer);
+
+    // Scroll to the bottom of the chatbox
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+   //Function to display thank you message
+  function displayBotMessage() {
+    const chatbox = document.getElementById("chatbox");
+
+    // Create a container for the bot message
+    const botContainer = document.createElement("div");
+    botContainer.classList.add("bot-container");
+
+    // Create bot icon
+    const botIcon = document.createElement("div");
+    botIcon.classList.add("bot-icon");
+    botContainer.appendChild(botIcon);
+
+    // Create a message wrapper for the bot's feedback message
+    const messageWrapper = document.createElement("div");
+    messageWrapper.classList.add("message-wrapper");
+
+    // Create the message element
+    const messageElem = document.createElement("div");
+    messageElem.classList.add("message", "bot");
+
+    // Create the message text
+    const messageSpan = document.createElement("span");
+    messageSpan.innerHTML = "Okay, please let me know how can I help you further?";
+
+    // Append the message to the message container
+    messageElem.appendChild(messageSpan);
+    messageWrapper.appendChild(messageElem);
+
+    // Append the message wrapper to the bot container
+    botContainer.appendChild(messageWrapper);
+
+    // Append the bot container to the chatbox
+    chatbox.appendChild(botContainer);
+
+    // Scroll to the bottom of the chatbox
+    chatbox.scrollTop = chatbox.scrollHeight;
+  } 
+
+    // Modify showFeedbackForm to return the form instead of appending it directly to chatbox
+    function showFeedbackForm() {
+      // Create a form element
+      const feedbackForm = document.createElement("form");
+      feedbackForm.classList.add("feedback-form");
+
+      // Define form fields
+      const fields = [
+          { label: "Name", type: "text", id: "userName", required: true },
+          { label: "Email", type: "email", id: "userEmail", required: true },
+          { label: "Phone Number", type: "tel", id: "userPhone", required: true },
+          { label: "Issue", type: "textarea", id: "userIssue", required: true }
+      ];
+
+      // Loop through fields and create input elements
+      fields.forEach(field => {
+          const fieldLabel = document.createElement("label");
+          fieldLabel.textContent = field.label;
+
+          const fieldInput = field.type === "textarea" ? document.createElement("textarea") : document.createElement("input");
+          fieldInput.type = field.type;
+          fieldInput.id = field.id;
+          fieldInput.name = field.id;
+          fieldInput.required = field.required;  // Set the field as required
+
+          // Append label and input to the form
+          feedbackForm.appendChild(fieldLabel);
+          feedbackForm.appendChild(fieldInput);
+      });
+
+      // Add submit button to form
+      const submitButton = document.createElement("button");
+      submitButton.type = "submit";
+      submitButton.textContent = "Submit Feedback";
+
+      // Event listener for form submission
+      feedbackForm.addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          // Gather form data
+          const formData = {
+              user_name: document.getElementById("userName").value,
+              user_mail: document.getElementById("userEmail").value,
+              user_number: document.getElementById("userPhone").value,
+              user_feedback: document.getElementById("userIssue").value
+          };
+
+          // Validate all fields are filled in
+          if (!formData.user_name || !formData.user_mail || !formData.user_number || !formData.user_feedback) {
+              alert("Please fill in all required fields.");
+              return;
+          }
+
+          try {
+              // Send the form data to the API via POST request
+              const response = await fetch("http://127.0.0.1:8000/feedback", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify(formData)
+              });
+
+              if (response.ok) {
+                  displayFeedbackMessage();
+                  // Hide the feedback form
+                  // Disable all input fields after successful submission
+                  const formElements = feedbackForm.elements;
+                  for (let i = 0; i < formElements.length; i++) {
+                      formElements[i].disabled = true;
+                  }
+                  userInputContainer.style.display = "flex";
+              } else {
+                  alert("There was an error submitting your feedback. Please try again.");
+              }
+          } catch (error) {
+              console.error("Error submitting feedback:", error);
+              alert("There was an issue connecting to the server.");
+          }
+      });
+
+      feedbackForm.appendChild(submitButton);
+
+      // Return the form to be appended elsewhere
+      return feedbackForm;
+    }    
       
     // Function to create and display the image modal
     function showImageModal(imageSrc) {
